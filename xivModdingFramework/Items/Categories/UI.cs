@@ -356,8 +356,10 @@ namespace xivModdingFramework.Items.Categories
             {
                 var name = (string)action.GetColumnByName("Name");
 
+                // HACKHACK - There is a type difference between language version still, so we need to handle both UInt16 and UInt32 Icon IDs
+                var boxedIconId = action.GetColumnByName("Icon");
                 // HACKHACK - Because SE is unlikely to ever actually use past 2^31 icons here, the simpler choice is used of casting this to int for now.
-                int iconId = (int)((uint)action.GetColumnByName("Icon"));
+                int iconId = (int)(boxedIconId is ushort ? (ushort)boxedIconId : (uint)boxedIconId);
 
                 if (string.IsNullOrWhiteSpace(name)) return;
 
@@ -693,7 +695,7 @@ namespace xivModdingFramework.Items.Categories
                     IconNumber = id,
                 };
                 //painting.IconId = (ushort)itemRow.GetColumnByName("Icon");
-                painting.Name = (string)itemRow.GetColumnByName("Name") + " Icon";
+                painting.Name = $"{(string)itemRow.GetColumnByName("Name")} {XivStrings.Icon}";
 
 
                 lock (paintingsLock)
