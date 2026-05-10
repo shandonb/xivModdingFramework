@@ -19,6 +19,8 @@ namespace xivModdingFramework.General.DataContainers
         private List<RacialScalingParameter> RawRacialData = new List<RacialScalingParameter>();
         private List<byte[]> ColorPixels = new List<byte[]>();
 
+        public int MetaDataStart { get; private set; }
+
         public CharaMakeParameterSet(byte[] data)
         {
             // SE adds new color blocks between patches, so calculate the RSP offset from the back instead of hardcoding it
@@ -31,6 +33,7 @@ namespace xivModdingFramework.General.DataContainers
             /// The point in the human.cmp file at which the racial scaling metadata begins.
             /// </summary>
             var metadataStart = data.Length - rspDataSize;
+            MetaDataStart = metadataStart;
 
             ColorPixels.Capacity = metadataStart / 4;
 
