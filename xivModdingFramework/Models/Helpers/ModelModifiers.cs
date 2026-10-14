@@ -1366,24 +1366,21 @@ namespace xivModdingFramework.Models.Helpers
                                 var boneWeight = (v.Weights[b]) / 255f;
 
                                 var matrix = Matrix.Identity;
-                                var normalMatrix = Matrix.Identity;
                                 matrix = def.Deformations[boneName];
-                                normalMatrix = def.NormalDeformations[boneName];
 
                                 if (invert)
                                 {
                                     matrix = def.InvertedDeformations[boneName];
-                                    normalMatrix = def.InvertedNormalDeformations[boneName];
                                 }
 
 
                                 position += MatrixTransform(v.Position, matrix) * boneWeight;
-                                normal += MatrixTransform(v.Normal, normalMatrix) * boneWeight;
-                                binormal += MatrixTransform(v.Binormal, matrix) * boneWeight;
-                                tangent += MatrixTransform(v.Tangent, matrix) * boneWeight;
+                                normal += DirectionTransform(v.Normal, matrix) * boneWeight;
+                                binormal += DirectionTransform(v.Binormal, matrix) * boneWeight;
+                                tangent += DirectionTransform(v.Tangent, matrix) * boneWeight;
                                 if (v.FlowDirection != Vector3.Zero)
                                 {
-                                    flow += MatrixTransform(v.FlowDirection, matrix) * boneWeight;
+                                    flow += DirectionTransform(v.FlowDirection, matrix) * boneWeight;
                                 }
                             }
 
@@ -1413,24 +1410,21 @@ namespace xivModdingFramework.Models.Helpers
                                     var boneWeight = (v.Weights[b]) / 255f;
 
                                     var matrix = Matrix.Identity;
-                                    var normalMatrix = Matrix.Identity;
                                     matrix = def.Deformations[boneName];
-                                    normalMatrix = def.NormalDeformations[boneName];
 
                                     if (invert)
                                     {
                                         matrix = def.InvertedDeformations[boneName];
-                                        normalMatrix = def.InvertedNormalDeformations[boneName];
                                     }
 
 
                                     position += MatrixTransform(v.Position, matrix) * boneWeight;
-                                    normal += MatrixTransform(v.Normal, normalMatrix) * boneWeight;
-                                    binormal += MatrixTransform(v.Binormal, matrix) * boneWeight;
-                                    tangent += MatrixTransform(v.Tangent, matrix) * boneWeight;
+                                    normal += DirectionTransform(v.Normal, matrix) * boneWeight;
+                                    binormal += DirectionTransform(v.Binormal, matrix) * boneWeight;
+                                    tangent += DirectionTransform(v.Tangent, matrix) * boneWeight;
                                     if (v.FlowDirection != Vector3.Zero)
                                     {
-                                        flow += MatrixTransform(v.FlowDirection, matrix) * boneWeight;
+                                        flow += DirectionTransform(v.FlowDirection, matrix) * boneWeight;
                                     }
                                 }
 
@@ -1483,6 +1477,25 @@ namespace xivModdingFramework.Models.Helpers
             return pMatrix;
         }
 
+
+        /// <summary>
+        /// Applies only the linear part of a deformation matrix to a direction (a normal, binormal, tangent or flow
+        /// direction): the same rows MatrixTransform uses, without the translation, which belongs to positions only.
+        ///
+        /// Normals take the deformation matrix itself rather than its inverse transpose, because that is what the game
+        /// does: it applies racial deforms through the skinning matrices, and its vertex shaders skin NORMAL and
+        /// BINORMAL with the same 3x3 rows as POSITION (dp3 against the joint rows, skin.shpk vs 18). Matching that is
+        /// what makes a converted body's neck meet a native face's: for Hyur male to Elezen male the seam normals sit
+        /// 1.6 degrees from the face's this way and 2.9 degrees the inverse-transpose way. Adding the translation to
+        /// directions bent binormals by 2 degrees on average for Elezen and by about 19 for Lalafell and Roegadyn.
+        /// </summary>
+        private static Vector3 DirectionTransform(Vector3 vector, Matrix transform)
+        {
+            return new Vector3(
+                (vector.X * transform[0]) + (vector.Y * transform[1]) + (vector.Z * transform[2]),
+                (vector.X * transform[4]) + (vector.Y * transform[5]) + (vector.Z * transform[6]),
+                (vector.X * transform[8]) + (vector.Y * transform[9]) + (vector.Z * transform[10]));
+        }
 
         /// <summary>
         /// This takes a standard Affine Transformation matrix [0,0,0,1 on bottom], and a vector, and applies the transformation to it.
