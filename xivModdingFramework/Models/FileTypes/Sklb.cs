@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -538,13 +539,13 @@ namespace xivModdingFramework.Models.FileTypes
                     for (var i = 0; i < matches.Count; i += 3)
                     {
                         var t = matches[i].Groups[1].Value.Split(' ');
-                        var translation = new Vector3(float.Parse(t[0]), float.Parse(t[1]), float.Parse(t[2]));
+                        var translation = new Vector3(float.Parse(t[0], CultureInfo.InvariantCulture), float.Parse(t[1], CultureInfo.InvariantCulture), float.Parse(t[2], CultureInfo.InvariantCulture));
 
                         var r = matches[i + 1].Groups[1].Value.Split(' ');
-                        var rotation = new Vector4(float.Parse(r[0]), float.Parse(r[1]), float.Parse(r[2]), float.Parse(r[3]));
+                        var rotation = new Vector4(float.Parse(r[0], CultureInfo.InvariantCulture), float.Parse(r[1], CultureInfo.InvariantCulture), float.Parse(r[2], CultureInfo.InvariantCulture), float.Parse(r[3], CultureInfo.InvariantCulture));
 
                         var s = matches[i + 2].Groups[1].Value.Split(' ');
-                        var scale = new Vector3(float.Parse(s[0]), float.Parse(s[1]), float.Parse(s[2]));
+                        var scale = new Vector3(float.Parse(s[0], CultureInfo.InvariantCulture), float.Parse(s[1], CultureInfo.InvariantCulture), float.Parse(s[2], CultureInfo.InvariantCulture));
 
                         var tMatrix = Matrix.Scaling(scale) * Matrix.RotationQuaternion(new Quaternion(rotation)) * Matrix.Translation(translation);
 
